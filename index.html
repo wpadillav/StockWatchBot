@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📈 Bolsa de Valores - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c5aa0;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
+            padding: 30px;
+        }
+        
+        .stock-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 15px 20px;
+            margin: 5px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stock-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        
+        .action-button {
+            margin: 5px;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .price-display {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .trend-up { color: var(--success-color); }
+        .trend-down { color: var(--danger-color); }
+        .trend-neutral { color: var(--warning-color); }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stock-info {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .recommendation {
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .recommendation.STRONG_BUY { background: #d4edda; color: #155724; }
+        .recommendation.BUY { background: #d1ecf1; color: #0c5460; }
+        .recommendation.HOLD { background: #fff3cd; color: #856404; }
+        .recommendation.SELL { background: #f8d7da; color: #721c24; }
+        .recommendation.STRONG_SELL { background: #f5c6cb; color: #491217; }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 12px 25px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(44, 90, 160, 0.2);
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(44, 90, 160, 0.4);
+        }
+        
+        .btn-outline-secondary {
+            border: 2px solid #6c757d;
+            color: #6c757d;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: #6c757d;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        #moreStocksSection h5 {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        #moreStocksSection {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px 20px;
+            margin-top: 30px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .footer {
+            background: linear-gradient(135deg, #37474f 0%, #455a64 100%);
+            color: #ecf0f1;
+            padding: 25px 0;
+            margin-top: 50px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .footer .creator-name {
+            color: #90caf9;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid transparent;
+        }
+        
+        .footer .creator-name:hover {
+            color: #bbdefb;
+            text-shadow: 0 0 8px rgba(144, 202, 249, 0.3);
+            border-bottom: 1px solid #90caf9;
+        }
+        
+        .footer .ai-credit {
+            color: #ce93d8;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .footer .ai-credit:hover {
+            color: #e1bee7;
+            text-shadow: 0 0 8px rgba(206, 147, 216, 0.3);
+        }
+        
+        .footer .heart {
+            color: #f48fb1;
+            animation: heartbeat 2.5s ease-in-out infinite;
+            margin: 0 4px;
+            font-size: 0.9rem;
+        }
+        
+        .footer .subtitle {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 8px;
+            color: #b0bec5;
+            font-style: italic;
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-container">
+            <div class="text-center mb-4">
+                <h1 class="display-4">📈 Bolsa de Valores</h1>
+                <p class="lead text-muted">Consulta las cotizaciones de las principales acciones del mercado</p>
+                
+                <!-- Bot de Telegram Banner -->
+                <div class="alert alert-info mb-3" style="background: linear-gradient(45deg, #17a2b8, #20c997); border: none; color: white; max-width: 600px; margin: 0 auto;">
+                    <div class="d-flex align-items-center justify-content-center flex-wrap">
+                        <div class="me-3 mb-2 mb-md-0">
+                            <i class="fab fa-telegram" style="font-size: 2rem; margin-right: 10px;"></i>
+                            <strong>¡Nuevo Bot de Telegram!</strong>
+                        </div>
+                        <div>
+                            <a href="https://t.me/BolsaBotESbot" target="_blank" class="btn btn-light btn-sm" style="font-weight: bold;">
+                                <i class="fas fa-plus"></i> Suscribirse GRATIS a @BolsaBotESbot
+                            </a>
+                        </div>
+                    </div>
+                    <small class="d-block mt-2" style="opacity: 0.9;">
+                        📱 Cotizaciones desde Telegram • 📊 Botones interactivos • ⚡ Respuestas instantáneas
+                    </small>
+                </div>
+                
+                <div class="mb-3">
+                    <a href="docs.html" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-book"></i> Ver Documentación de la API
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Botones de Acciones -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="mb-3">🎯 Selecciona una Acción:</h4>
+                    <div class="text-center">
+                        <!-- META destacado como primera opción -->
+                        <button class="btn stock-button" onclick="loadStock('META', 'Meta Platforms Inc.')" style="background: linear-gradient(45deg, #1877f2, #42a5f5); font-weight: bold; border: 2px solid #1877f2;">
+                            <i class="fab fa-facebook"></i> META - Meta/Facebook ⭐
+                        </button>
+                        <br>
+                        <button class="btn stock-button" onclick="loadStock('AAPL', 'Apple Inc.')">
+                            <i class="fab fa-apple"></i> AAPL - Apple Inc.
+                        </button>
+                        <button class="btn stock-button" onclick="loadStock('GOOGL', 'Alphabet Inc.')">
+                            <i class="fas fa-search"></i> GOOGL - Alphabet Inc.
+                        </button>
+                        <button class="btn stock-button" onclick="loadStock('MSFT', 'Microsoft Corporation')">
+                            <i class="fab fa-microsoft"></i> MSFT - Microsoft
+                        </button>
+                        <button class="btn stock-button" onclick="loadStock('AMZN', 'Amazon.com Inc.')">
+                            <i class="fab fa-amazon"></i> AMZN - Amazon
+                        </button>
+                        <button class="btn stock-button" onclick="loadStock('TSLA', 'Tesla Inc.')">
+                            <i class="fas fa-car"></i> TSLA - Tesla
+                        </button>
+                        <button class="btn stock-button" onclick="loadStock('META', 'Meta Platforms Inc.')">
+                            <i class="fab fa-meta"></i> META - Meta
+                        </button>
+                        <button class="btn stock-button" onclick="loadStock('NFLX', 'Netflix Inc.')">
+                            <i class="fas fa-play"></i> NFLX - Netflix
+                        </button>
+                        <button class="btn stock-button" onclick="loadStock('NVDA', 'NVIDIA Corporation')">
+                            <i class="fas fa-microchip"></i> NVDA - NVIDIA
+                        </button>
+                        <button class="btn stock-button" onclick="loadStock('AMD', 'Advanced Micro Devices')">
+                            <i class="fas fa-memory"></i> AMD - AMD
+                        </button>
+                        <button class="btn stock-button" onclick="loadStock('INTC', 'Intel Corporation')">
+                            <i class="fas fa-microchip"></i> INTC - Intel
+                        </button>
+                    </div>
+                    
+                    <!-- Botón para mostrar más acciones -->
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-primary btn-lg" id="moreStocksBtn" onclick="toggleMoreStocks()">
+                            <i class="fas fa-plus-circle"></i> Más Acciones
+                        </button>
+                    </div>
+                    
+                    <!-- Sección de acciones adicionales (inicialmente oculta) -->
+                    <div id="moreStocksSection" style="display: none;" class="mt-4">
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="text-center mb-4">🏢 Tecnología</h5>
+                                <div class="text-center">
+                                    <button class="btn stock-button" onclick="loadStock('ORCL', 'Oracle Corporation')">
+                                        <i class="fas fa-database"></i> ORCL - Oracle
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('IBM', 'International Business Machines')">
+                                        <i class="fas fa-server"></i> IBM - IBM
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('CRM', 'Salesforce')">
+                                        <i class="fas fa-cloud"></i> CRM - Salesforce
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('ADBE', 'Adobe Inc.')">
+                                        <i class="fas fa-palette"></i> ADBE - Adobe
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-center mb-4">🛒 Comercio y Retail</h5>
+                                <div class="text-center">
+                                    <button class="btn stock-button" onclick="loadStock('WMT', 'Walmart Inc.')">
+                                        <i class="fas fa-shopping-cart"></i> WMT - Walmart
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('HD', 'The Home Depot')">
+                                        <i class="fas fa-tools"></i> HD - Home Depot
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('TGT', 'Target Corporation')">
+                                        <i class="fas fa-bullseye"></i> TGT - Target
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('COST', 'Costco Wholesale')">
+                                        <i class="fas fa-warehouse"></i> COST - Costco
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-center mb-4">🚗 Automotriz</h5>
+                                <div class="text-center">
+                                    <button class="btn stock-button" onclick="loadStock('F', 'Ford Motor Company')">
+                                        <i class="fas fa-car"></i> F - Ford
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('GM', 'General Motors')">
+                                        <i class="fas fa-car-side"></i> GM - General Motors
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('NIO', 'NIO Inc.')">
+                                        <i class="fas fa-charging-station"></i> NIO - NIO
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('RIVN', 'Rivian Automotive')">
+                                        <i class="fas fa-truck-pickup"></i> RIVN - Rivian
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-center mb-4">💰 Servicios Financieros</h5>
+                                <div class="text-center">
+                                    <button class="btn stock-button" onclick="loadStock('JPM', 'JPMorgan Chase & Co.')">
+                                        <i class="fas fa-university"></i> JPM - JPMorgan
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('BAC', 'Bank of America')">
+                                        <i class="fas fa-landmark"></i> BAC - Bank of America
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('V', 'Visa Inc.')">
+                                        <i class="fab fa-cc-visa"></i> V - Visa
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('MA', 'Mastercard Inc.')">
+                                        <i class="fab fa-cc-mastercard"></i> MA - Mastercard
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('PYPL', 'PayPal Holdings')">
+                                        <i class="fab fa-paypal"></i> PYPL - PayPal
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-center mb-4">🏥 Salud y Farmacéuticas</h5>
+                                <div class="text-center">
+                                    <button class="btn stock-button" onclick="loadStock('JNJ', 'Johnson & Johnson')">
+                                        <i class="fas fa-pills"></i> JNJ - Johnson & Johnson
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('PFE', 'Pfizer Inc.')">
+                                        <i class="fas fa-syringe"></i> PFE - Pfizer
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('UNH', 'UnitedHealth Group')">
+                                        <i class="fas fa-heartbeat"></i> UNH - UnitedHealth
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('MRNA', 'Moderna Inc.')">
+                                        <i class="fas fa-dna"></i> MRNA - Moderna
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-center mb-4">🎬 Entretenimiento y Media</h5>
+                                <div class="text-center">
+                                    <button class="btn stock-button" onclick="loadStock('DIS', 'The Walt Disney Company')">
+                                        <i class="fas fa-magic"></i> DIS - Disney
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('SPOT', 'Spotify Technology')">
+                                        <i class="fab fa-spotify"></i> SPOT - Spotify
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('ROKU', 'Roku Inc.')">
+                                        <i class="fas fa-tv"></i> ROKU - Roku
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('WBD', 'Warner Bros Discovery')">
+                                        <i class="fas fa-film"></i> WBD - Warner Bros
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-center mb-4">⚡ Energía</h5>
+                                <div class="text-center">
+                                    <button class="btn stock-button" onclick="loadStock('XOM', 'Exxon Mobil')">
+                                        <i class="fas fa-oil-can"></i> XOM - Exxon Mobil
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('CVX', 'Chevron Corporation')">
+                                        <i class="fas fa-gas-pump"></i> CVX - Chevron
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('COP', 'ConocoPhillips')">
+                                        <i class="fas fa-industry"></i> COP - ConocoPhillips
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('NEE', 'NextEra Energy')">
+                                        <i class="fas fa-solar-panel"></i> NEE - NextEra Energy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-center mb-4">🇪🇸 Mercado Español</h5>
+                                <div class="text-center">
+                                    <button class="btn stock-button" onclick="loadStock('SAN.MC', 'Banco Santander')">
+                                        <i class="fas fa-university"></i> SAN.MC - Santander
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('BBVA.MC', 'Banco Bilbao Vizcaya Argentaria')">
+                                        <i class="fas fa-landmark"></i> BBVA.MC - BBVA
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('IBE.MC', 'Iberdrola')">
+                                        <i class="fas fa-bolt"></i> IBE.MC - Iberdrola
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('ITX.MC', 'Inditex')">
+                                        <i class="fas fa-tshirt"></i> ITX.MC - Inditex
+                                    </button>
+                                    <button class="btn stock-button" onclick="loadStock('TEF.MC', 'Telefónica')">
+                                        <i class="fas fa-phone"></i> TEF.MC - Telefónica
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Botón para ocultar -->
+                        <div class="text-center mt-4">
+                            <button class="btn btn-outline-secondary" onclick="toggleMoreStocks()">
+                                <i class="fas fa-minus-circle"></i> Ocultar Acciones Adicionales
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones de Tipo de Consulta -->
+            <div class="row mb-4" id="actionButtons" style="display: none;">
+                <div class="col-12">
+                    <h4 class="mb-3">📊 ¿Qué información deseas ver?</h4>
+                    <div class="text-center">
+                        <button class="btn btn-primary action-button" onclick="getQuote()">
+                            <i class="fas fa-dollar-sign"></i> Cotización Actual
+                        </button>
+                        <button class="btn btn-success action-button" onclick="getTrend()">
+                            <i class="fas fa-chart-line"></i> Análisis de Tendencia
+                        </button>
+                        <button class="btn btn-info action-button" onclick="getHistory()">
+                            <i class="fas fa-history"></i> Historial (30 días)
+                        </button>
+                        <button class="btn btn-warning action-button" onclick="getHistory(7)">
+                            <i class="fas fa-clock"></i> Historial (7 días)
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Área de Resultados -->
+            <div id="results"></div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentSymbol = '';
+        let currentCompanyName = '';
+        let moreStocksVisible = false;
+        
+        // Función para mostrar/ocultar más acciones
+        function toggleMoreStocks() {
+            const moreStocksSection = document.getElementById('moreStocksSection');
+            const moreStocksBtn = document.getElementById('moreStocksBtn');
+            
+            if (moreStocksVisible) {
+                moreStocksSection.style.display = 'none';
+                moreStocksBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Más Acciones';
+                moreStocksVisible = false;
+                
+                // Scroll suave hacia los botones principales
+                document.querySelector('.row').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            } else {
+                moreStocksSection.style.display = 'block';
+                moreStocksBtn.innerHTML = '<i class="fas fa-minus-circle"></i> Menos Acciones';
+                moreStocksVisible = true;
+                
+                // Animar la aparición de los nuevos botones
+                setTimeout(() => {
+                    const newButtons = moreStocksSection.querySelectorAll('.stock-button');
+                    newButtons.forEach((button, index) => {
+                        button.style.opacity = '0';
+                        button.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            button.style.transition = 'all 0.3s ease';
+                            button.style.opacity = '1';
+                            button.style.transform = 'translateY(0)';
+                        }, index * 50);
+                    });
+                }, 100);
+                
+                // Scroll suave hacia la nueva sección
+                setTimeout(() => {
+                    moreStocksSection.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }, 300);
+            }
+        }
+        
+        // Diferentes rutas para probar la API
+        const apiPaths = [
+            './api.php',
+            './api/api.php',
+            '/PATCH/api/api.php',
+            'api.php'
+        ];
+        let currentApiPath = apiPaths[0];
+        
+        async function tryApiRequest(endpoint, params) {
+            for (const path of apiPaths) {
+                try {
+                    const url = `${path}?${params}`;
+                    console.log(`Trying API path: ${url}`);
+                    
+                    const response = await fetch(url);
+                    
+                    if (response.ok) {
+                        currentApiPath = path;
+                        console.log(`API working with path: ${path}`);
+                        return response;
+                    }
+                } catch (error) {
+                    console.log(`Failed with path ${path}:`, error.message);
+                    continue;
+                }
+            }
+            throw new Error('No se pudo conectar con la API usando ninguna ruta');
+        }
+        
+        function loadStock(symbol, companyName) {
+            currentSymbol = symbol;
+            currentCompanyName = companyName;
+            document.getElementById('actionButtons').style.display = 'block';
+            document.getElementById('results').innerHTML = `
+                <div class="result-card text-center">
+                    <h3>✅ Acción seleccionada: <span class="text-primary">${symbol}</span></h3>
+                    <p class="text-muted">${companyName}</p>
+                    <p>Ahora elige qué información quieres consultar 👆</p>
+                </div>
+            `;
+        }
+        
+        function showLoading() {
+            document.getElementById('results').innerHTML = `
+                <div class="result-card">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                    <p class="text-center">Cargando información de ${currentSymbol}...</p>
+                </div>
+            `;
+        }
+        
+        async function getQuote() {
+            showLoading();
+            try {
+                const params = `symbol=${currentSymbol}&action=quote`;
+                const response = await tryApiRequest('quote', params);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.success) {
+                    const quote = data.data;
+                    const trendClass = quote.trend === 'UP' ? 'trend-up' : 
+                                     quote.trend === 'DOWN' ? 'trend-down' : 'trend-neutral';
+                    const trendIcon = quote.trend === 'UP' ? 'fas fa-arrow-up' : 
+                                    quote.trend === 'DOWN' ? 'fas fa-arrow-down' : 'fas fa-minus';
+                    const trendText = quote.trend === 'UP' ? 'Subiendo' : 
+                                    quote.trend === 'DOWN' ? 'Bajando' : 'Estable';
+                    
+                    document.getElementById('results').innerHTML = `
+                        <div class="result-card">
+                            <div class="text-center mb-4">
+                                <h2>💰 Cotización de ${quote.symbol}</h2>
+                                <h5 class="text-muted">${currentCompanyName}</h5>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="stock-info">
+                                        <h4>Precio Actual</h4>
+                                        <div class="price-display ${trendClass}">
+                                            $${quote.price.toLocaleString()}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="stock-info">
+                                        <h4>Cambio del Día</h4>
+                                        <div class="price-display ${trendClass}">
+                                            <i class="${trendIcon}"></i> 
+                                            ${quote.change > 0 ? '+' : ''}$${quote.change}
+                                            <small>(${quote.change_percent})</small>
+                                        </div>
+                                        <p class="mb-0"><strong>Tendencia:</strong> <span class="${trendClass}">${trendText}</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-3">
+                                    <div class="stock-info text-center">
+                                        <h6>🔼 Máximo</h6>
+                                        <strong>$${quote.high.toLocaleString()}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stock-info text-center">
+                                        <h6>🔽 Mínimo</h6>
+                                        <strong>$${quote.low.toLocaleString()}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stock-info text-center">
+                                        <h6>🌅 Apertura</h6>
+                                        <strong>$${quote.open.toLocaleString()}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stock-info text-center">
+                                        <h6>📊 Volumen</h6>
+                                        <strong>${quote.volume.toLocaleString()}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${quote.note ? `<div class="alert alert-info mt-3"><i class="fas fa-info-circle"></i> ${quote.note}</div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                console.error('Error in getQuote:', error);
+                showError(`Error al conectar con la API: ${error.message}`);
+            }
+        }
+        
+        async function getTrend() {
+            showLoading();
+            try {
+                const params = `symbol=${currentSymbol}&action=trend`;
+                const response = await tryApiRequest('trend', params);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.success) {
+                    const trend = data.data;
+                    const trendClass = trend.trend === 'UP' ? 'trend-up' : 
+                                     trend.trend === 'DOWN' ? 'trend-down' : 'trend-neutral';
+                    const trendIcon = trend.trend === 'UP' ? 'fas fa-arrow-up' : 
+                                    trend.trend === 'DOWN' ? 'fas fa-arrow-down' : 'fas fa-minus';
+                    const trendText = trend.trend === 'UP' ? 'Alcista (Subiendo)' : 
+                                    trend.trend === 'DOWN' ? 'Bajista (Bajando)' : 'Lateral (Estable)';
+                    
+                    const recommendations = {
+                        'STRONG_BUY': 'Compra Fuerte 🚀',
+                        'BUY': 'Comprar 📈',
+                        'HOLD': 'Mantener 🤝',
+                        'SELL': 'Vender 📉',
+                        'STRONG_SELL': 'Venta Fuerte 🔴'
+                    };
+                    
+                    document.getElementById('results').innerHTML = `
+                        <div class="result-card">
+                            <div class="text-center mb-4">
+                                <h2>📊 Análisis de Tendencia</h2>
+                                <h4>${trend.symbol} - ${currentCompanyName}</h4>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="stock-info text-center">
+                                        <h4>Tendencia Actual</h4>
+                                        <div class="price-display ${trendClass}">
+                                            <i class="${trendIcon}"></i> ${trendText}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="stock-info text-center">
+                                        <h4>Cambio del Día</h4>
+                                        <div class="price-display ${trendClass}">
+                                            ${trend.change > 0 ? '+' : ''}$${trend.change}
+                                            <small>(${trend.change_percent})</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation ${trend.recommendation}">
+                                <h4>💡 Recomendación de Inversión</h4>
+                                <div style="font-size: 1.5rem;">
+                                    ${recommendations[trend.recommendation] || trend.recommendation}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                console.error('Error in getTrend:', error);
+                showError(`Error al conectar con la API: ${error.message}`);
+            }
+        }
+        
+        async function getHistory(days = 30) {
+            showLoading();
+            try {
+                const params = `symbol=${currentSymbol}&action=history&days=${days}`;
+                const response = await tryApiRequest('history', params);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.success) {
+                    const history = data.data;
+                    const tableRows = history.data.map(item => `
+                        <tr>
+                            <td>${new Date(item.date).toLocaleDateString('es-ES')}</td>
+                            <td>$${item.price.toLocaleString()}</td>
+                            <td>${item.volume.toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                    
+                    const firstPrice = history.data[0]?.price || 0;
+                    const lastPrice = history.data[history.data.length - 1]?.price || 0;
+                    const totalChange = lastPrice - firstPrice;
+                    const totalChangePercent = ((totalChange / firstPrice) * 100).toFixed(2);
+                    
+                    const changeClass = totalChange >= 0 ? 'trend-up' : 'trend-down';
+                    const changeIcon = totalChange >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down';
+                    
+                    document.getElementById('results').innerHTML = `
+                        <div class="result-card">
+                            <div class="text-center mb-4">
+                                <h2>📅 Historial de ${days} días</h2>
+                                <h4>${history.symbol} - ${currentCompanyName}</h4>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="stock-info text-center">
+                                        <h5>Precio Inicial (${days} días atrás)</h5>
+                                        <div class="h4">$${firstPrice.toLocaleString()}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="stock-info text-center">
+                                        <h5>Precio Actual</h5>
+                                        <div class="h4">$${lastPrice.toLocaleString()}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="stock-info text-center">
+                                <h5>Cambio en ${days} días</h5>
+                                <div class="price-display ${changeClass}">
+                                    <i class="${changeIcon}"></i> 
+                                    ${totalChange > 0 ? '+' : ''}$${totalChange.toFixed(2)}
+                                    <small>(${totalChangePercent > 0 ? '+' : ''}${totalChangePercent}%)</small>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive mt-4">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>📅 Fecha</th>
+                                            <th>💰 Precio</th>
+                                            <th>📊 Volumen</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${tableRows}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                console.error('Error in getHistory:', error);
+                showError(`Error al conectar con la API: ${error.message}`);
+            }
+        }
+        
+        function showError(message) {
+            document.getElementById('results').innerHTML = `
+                <div class="result-card">
+                    <div class="alert alert-danger text-center">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Error</h4>
+                        <p>${message}</p>
+                        <small class="text-muted">
+                            Revisa la consola del navegador (F12) para más detalles.
+                            <br>URL actual: ${window.location.href}
+                        </small>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Verificar conectividad con la API al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            testAPIConnectivity();
+            
+            const buttons = document.querySelectorAll('.stock-button');
+            buttons.forEach((button, index) => {
+                setTimeout(() => {
+                    button.style.opacity = '0';
+                    button.style.transform = 'translateY(20px)';
+                    button.style.animation = `fadeIn 0.5s ease forwards`;
+                    button.style.animationDelay = `${index * 0.1}s`;
+                }, 100);
+            });
+        });
+        
+        async function testAPIConnectivity() {
+            try {
+                console.log('Testing API connectivity...');
+                const response = await tryApiRequest('test', 'symbol=AAPL&action=quote');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('API is working:', data.success);
+                    console.log('Using API path:', currentApiPath);
+                } else {
+                    console.warn('API returned non-200 status:', response.status);
+                }
+            } catch (error) {
+                console.error('API connectivity test failed:', error);
+                // Mostrar aviso si la API no está disponible
+                showAPIWarning();
+            }
+        }
+        
+        function showAPIWarning() {
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'alert alert-warning mt-3';
+            warningDiv.innerHTML = `
+                <h5><i class="fas fa-exclamation-triangle"></i> Aviso de Conectividad</h5>
+                <p>Hay problemas para conectar con la API. Esto puede deberse a:</p>
+                <ul>
+                    <li>El servidor web no está ejecutándose</li>
+                    <li>Los archivos PHP no están en la ruta correcta</li>
+                    <li>Problemas de permisos en los archivos</li>
+                </ul>
+                <p><strong>Verifica la consola del navegador (F12) para más detalles.</strong></p>
+            `;
+            document.querySelector('.main-container').insertBefore(warningDiv, document.querySelector('.row').nextSibling);
+        }
+    </script>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>
+                Desarrollado con <span class="heart">♥</span> por 
+                <a href="#" class="creator-name">William Padilla</a> 
+                | Asistido por <span class="ai-credit">GitHub Copilot</span>
+            </p>
+            <div class="subtitle">
+                © 2025 - Sistema de Cotizaciones Bursátiles | API Demo 
+                | <a href="https://t.me/BolsaBotESbot" target="_blank" style="color: #17a2b8; text-decoration: none;">
+                    <i class="fab fa-telegram"></i> @BolsaBotESbot
+                </a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

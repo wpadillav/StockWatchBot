@@ -1,0 +1,292 @@
+# 🚫 StockWatchBot - .gitignore
+
+# =============================================================================
+# ARCHIVOS DE LOGS Y DEPURACIÓN
+# =============================================================================
+*.log
+logs/
+debug.log
+bot_debug.log
+error.log
+access.log
+
+# =============================================================================
+# ARCHIVOS DE CONFIGURACIÓN SENSIBLES
+# =============================================================================
+# Configuración local con tokens y credenciales
+config.local.php
+.env
+.env.local
+.env.production
+
+# Archivos de configuración de desarrollo
+dev-config.php
+local-config.php
+private-config.php
+
+# =============================================================================
+# ARCHIVOS DE CACHÉ Y TEMPORALES
+# =============================================================================
+# Cache del sistema
+cache/
+tmp/
+temp/
+.cache/
+*.cache
+*.tmp
+
+# Cache específico de StockAPI
+stock_cache/
+api_cache/
+
+# =============================================================================
+# ARCHIVOS DEL SISTEMA OPERATIVO
+# =============================================================================
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# =============================================================================
+# EDITORES E IDEs
+# =============================================================================
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.swp
+*.swo
+*~
+.project
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+
+# Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+.vimrc
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# DEPENDENCIAS Y PAQUETES
+# =============================================================================
+# Composer
+vendor/
+composer.phar
+composer.lock
+
+# NPM (si se usa para assets)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# =============================================================================
+# ARCHIVOS DE BACKUP Y VERSIONADO
+# =============================================================================
+# Backups automáticos
+*.backup
+*.bak
+*.orig
+*.save
+*~
+
+# Archivos de patch
+*.patch
+*.diff
+
+# Dumps de base de datos
+*.sql
+*.dump
+*.db
+
+# =============================================================================
+# ARCHIVOS DE PRODUCCIÓN Y DEPLOYMENT
+# =============================================================================
+# Archivos de configuración de servidor
+.htaccess.backup
+.htpasswd
+nginx.conf
+apache.conf
+
+# Certificados SSL
+*.pem
+*.key
+*.crt
+*.csr
+
+# =============================================================================
+# HERRAMIENTAS DE DESARROLLO
+# =============================================================================
+# PHPUnit
+/phpunit.xml
+.phpunit.result.cache
+/coverage/
+
+# PHPStan
+phpstan.neon
+.phpstan/
+
+# Psalm
+psalm.xml
+.psalm/
+
+# PHP CS Fixer
+.php_cs.cache
+.php-cs-fixer.cache
+
+# =============================================================================
+# ARCHIVOS ESPECÍFICOS DEL PROYECTO
+# =============================================================================
+# Test files temporales
+test_*.php
+temp_*.php
+example_*.php
+
+# Archivos de prueba de API
+test_api.php
+test_bot.php
+debug_*.php
+
+# Uploads y archivos de usuario
+uploads/
+user_files/
+
+# =============================================================================
+# DOCUMENTACIÓN TEMPORAL
+# =============================================================================
+# Docs temporales o drafts
+docs/draft/
+*.draft.md
+*.temp.md
+
+# =============================================================================
+# HERRAMIENTAS DE MONITOREO Y ANALYTICS
+# =============================================================================
+# Error tracking
+error_tracking/
+sentry.config
+
+# Analytics
+analytics/
+stats/
+
+# =============================================================================
+# CONFIGURACIÓN DE HOSTING
+# =============================================================================
+# cPanel
+.cpanel/
+.htaccess.bak
+
+# Netlify
+.netlify/
+
+# Vercel
+.vercel/
+
+# =============================================================================
+# ARCHIVOS DE TESTING
+# =============================================================================
+# Screenshots de testing
+screenshots/
+test-results/
+
+# Coverage reports
+coverage/
+*.coverage
+.nyc_output/
+
+# =============================================================================
+# IMPORTANTE: MANTENER ESTOS ARCHIVOS
+# =============================================================================
+# NO ignorar estos archivos importantes:
+!.gitkeep
+!.htaccess
+!README.md
+!LICENSE
+!CONTRIBUTING.md
+!CHANGELOG.md
+
+# Ejemplo de configuración (sin datos sensibles)
+!config.example.php
+
+# =============================================================================
+# ARCHIVOS PERSONALIZADOS DE DESARROLLO
+# =============================================================================
+# Agregrar aquí archivos específicos de tu flujo de trabajo local
+my-notes.md
+personal-config.php
+local-test-*.php
+
+# =============================================================================
+# END OF .gitignore
+# =============================================================================
+# 📝 Nota: Siempre revisa que no estés commiteando datos sensibles
+# 🔒 Mantén seguros: tokens, passwords, API keys, certificados
+# 📊 Este .gitignore está optimizado para proyectos PHP/Web
